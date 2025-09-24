@@ -1026,41 +1026,41 @@ fun appendCompactLog(
         mealData: MealData,
         smbToGiveParam: Float,
         hypoThreshold: Double,
-        reason: StringBuilder? = null
+        safetyPrecautionsMessage: StringBuilder? = null
     ): Float {
         var smbToGive = smbToGiveParam
 
         val (isCrit, critMsg) = isCriticalSafetyCondition(mealData, hypoThreshold)
         if (isCrit) {
-            reason?.appendLine("🛑 $critMsg → SMB=0")
+            safetyPrecautionsMessage?.appendLine("🛑 $critMsg → SMB=0")
             return 0f
         }
 
         if (isSportSafetyCondition()) {
-            reason?.appendLine("🏃‍♂️ Safety sport → SMB=0")
+            safetyPrecautionsMessage?.appendLine("🏃‍♂️ Safety sport → SMB=0")
             return 0f
         }
         // ♀️ Ajustement cycle sur SMB (Ovulation: -, Lutéale: +5%, etc.)
-        smbToGive = applyWCycleOnSmb(smbToGive, reason)
+        smbToGive = applyWCycleOnSmb(smbToGive, safetyPrecautionsMessage)
         // Ajustements spécifiques
         val beforeAdj = smbToGive
         smbToGive = applySpecificAdjustments(smbToGive)
         if (smbToGive != beforeAdj) {
-            reason?.appendLine("🎛️ Ajustements: ${"%.2f".format(beforeAdj)} → ${"%.2f".format(smbToGive)} U")
+            safetyPrecautionsMessage?.appendLine("🎛️ Ajustements: ${"%.2f".format(beforeAdj)} → ${"%.2f".format(smbToGive)} U")
         }
 
         // Finalisation
         val beforeFinalize = smbToGive
         smbToGive = finalizeSmbToGive(smbToGive)
         if (smbToGive != beforeFinalize) {
-            reason?.appendLine("🧩 Finalisation: ${"%.2f".format(beforeFinalize)} → ${"%.2f".format(smbToGive)} U")
+            safetyPrecautionsMessage?.appendLine("🧩 Finalisation: ${"%.2f".format(beforeFinalize)} → ${"%.2f".format(smbToGive)} U")
         }
 
         // Limites max
         val beforeLimits = smbToGive
         smbToGive = applyMaxLimits(smbToGive)
         if (smbToGive != beforeLimits) {
-            reason?.appendLine("🧱 Limites: ${"%.2f".format(beforeLimits)} → ${"%.2f".format(smbToGive)} U")
+            safetyPrecautionsMessage?.appendLine("🧱 Limites: ${"%.2f".format(beforeLimits)} → ${"%.2f".format(smbToGive)} U")
         }
         smbToGive = smbToGive.coerceAtLeast(0f)
         return smbToGive
@@ -3699,7 +3699,9 @@ fun appendCompactLog(
 // ===== Fin MPC =====
 
 // ⚠️ passer la DECISION courante à la safety (pas finalInsulinDose)
-        smbDecision = applySafetyPrecautions(mealData, smbDecision, threshold,rT.reason)
+        var safetyPrecautionsMessage = StringBuilder()
+        smbDecision = applySafetyPrecautions(mealData, smbDecision, threshold,safetyPrecautionsMessage)
+        rT.reason.append(safetyPrecautionsMessage)
         rT.reason.appendLine("✅ SMB final: ${"%.2f".format(smbDecision)} U")
 
         smbToGive = roundToPoint05(smbDecision)
