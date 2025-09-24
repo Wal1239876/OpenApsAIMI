@@ -939,7 +939,7 @@ fun appendCompactLog(
         csvfile.appendText(valuesToRecord + "\n")
     }
 
-    private fun logDataToCsv(predictedSMB: Float, smbToGive: Float) {
+    private fun logDataToCsv(predictedSMB: Float, smbToGive: Float, safetyPrecautionsMessage : String) {
 
         val usFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm")
         val dateStr = dateUtil.dateAndTimeString(dateUtil.now()).format(usFormatter)
@@ -949,13 +949,13 @@ fun appendCompactLog(
             "tdd7DaysPerHour,tdd2DaysPerHour,tddPerHour,tdd24HrsPerHour," +
             "recentSteps5Minutes,recentSteps10Minutes,recentSteps15Minutes,recentSteps30Minutes,recentSteps60Minutes,recentSteps180Minutes," +
             "tags0to60minAgo,tags60to120minAgo,tags120to180minAgo,tags180to240minAgo," +
-            "predictedSMB,maxIob,maxSMB,smbGiven\n"
+            "predictedSMB,maxIob,maxSMB,smbGiven, safetyPrecautionsMessage\n"
         val valuesToRecord = "$dateStr,$hourOfDay,$weekend," +
             "$bg,$targetBg,$iob,$delta,$shortAvgDelta,$longAvgDelta," +
             "$tdd7DaysPerHour,$tdd2DaysPerHour,$tddPerHour,$tdd24HrsPerHour," +
             "$recentSteps5Minutes,$recentSteps10Minutes,$recentSteps15Minutes,$recentSteps30Minutes,$recentSteps60Minutes,$recentSteps180Minutes," +
             "$tags0to60minAgo,$tags60to120minAgo,$tags120to180minAgo,$tags180to240minAgo," +
-            "$predictedSMB,$maxIob,$maxSMB,$smbToGive"
+            "$predictedSMB,$maxIob,$maxSMB,$smbToGive,$safetyPrecautionsMessage"
         if (!csvfile2.exists()) {
             csvfile2.parentFile?.mkdirs() // Crée le dossier s'il n'existe pas
             csvfile2.createNewFile()
@@ -3708,7 +3708,7 @@ fun appendCompactLog(
 
 
         logDataMLToCsv(predictedSMB, smbToGive)
-        logDataToCsv(predictedSMB, smbToGive)
+        logDataToCsv(predictedSMB, smbToGive, safetyPrecautionsMessage.toString())
 
         //logDataToCsv(predictedSMB, smbToGive)
         //logDataToCsvHB(predictedSMB, smbToGive)
